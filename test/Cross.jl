@@ -1,7 +1,7 @@
 #=  dependencies  =#
-using CSV, DataFrames, BenchmarkTools, Plots, Revise
-include("../src/SFrontiers.jl")
-using .SFrontiers
+using CSV, DataFrames, BenchmarkTools, Plots, Revise, SFrontiers
+# include("../src/SFrontiers.jl")
+# using .SFrontiers
 
 
 #=  read data and create the constant column  =#
