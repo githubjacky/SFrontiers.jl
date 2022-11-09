@@ -1,7 +1,7 @@
 #=  dependencies  =#
-using CSV, DataFrames, BenchmarkTools, Plots, Revise, SFrontiers
-# include("../src/SFrontiers.jl")
-# using .SFrontiers
+using CSV, DataFrames, BenchmarkTools, Plots, Revise
+include("../src/SFrontiers.jl")
+using .SFrontiers
 
 
 #=  read data and create the constant column  =#
@@ -39,6 +39,13 @@ model = sfmodel_fit(
 
 # marginal effect
 marginal, marginal_mean = sfmarginal(model)
-m1 = plot(df[:,:age], marginal[:,:marg_age], seriestype = :scatter, xlabel = "age", 
-                 ylabel = "marginal effect of age in E(u)", label = false)
+# print(marginal)
+m1 = plot(
+    df[:,:age],
+    marginal[:,:marg_age],
+    seriestype=:scatter,
+    xlabel="age", 
+    ylabel="marginal effect of age in E(u)",
+    label=false
+)
 hline!([0.00], label = false)

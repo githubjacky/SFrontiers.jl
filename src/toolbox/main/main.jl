@@ -222,12 +222,10 @@ end
 - the only diversity to calculate the marginal effect is the unconditional mean
 - there are two modes: one is standard the other is bootstrap(default to standard)
 """
-function baseMarginal(ξ, struc, data; bootstrap=false)
+function baseMarginal(ξ, struc, data, bootstrap)
     # if the data is panel data flat it, otherwise ignore it
     dist_data = map(flatPanel, unpack(data.dist))
-    # each elements in dist_data is the property of dist
     var_nums = [varNum(i) for i in dist_data]
-    # total number of the variables can determine the marginal effect
     var_num = sum(var_nums)
     dist_data = hcat(dist_data...)
     dist_coef = slice(ξ, struc.ψ, mle=true)[2]
@@ -243,15 +241,15 @@ function baseMarginal(ξ, struc, data; bootstrap=false)
             dist_data[i, begin:end]
         )
     end
-    beg_colname = varNum(data.frontiers) + 1
-    en_colname = beg_colname + sum(var_nums) - 1
-    colnames = struc.varmat[beg_colname:en_colname, 2]  # use the varmat to get the column name of datafrae
-    mm, label = cleanMarginalEffect(mm, colnames)  # drop the duplicated and constant columns
-    marginal_frame = DataFrame(mm, label)
-
-    margMean = (; zip(Symbol.(names(marginal_frame)) , round.(mean.(eachcol(marginal_frame)); digits=5))...)
-    newname = Symbol.(fill("marg_", (size(marginal_frame,2), 1)) .* names(marginal_frame))
-    rename!(marginal_frame, vec(newname))
-   
-    return marginal_frame, margMean
-end
+    beg_label = varNum(data.frontiers) + 1
+    en_label = beg_label + sum(var_nums) - 1
+    label = struc.varmat[beg_label:en_label, 2]  # use the varmat to get the column name of datafrae
+    mm, label = cleanMarginalEffect(mm, label)  # drop the duplicated and constant columns
+    mean_marginal = mean(mm, dims=1)
+    if bootstrap
+        return mm, mean_marginal
+    else
+        label = [Symbol(:marg_, i) for i in label]
+        return DataFrame(mm, label), NamedTuple{Tuple(label)}(mean_marginal)
+    end
+end  

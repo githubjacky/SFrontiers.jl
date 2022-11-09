@@ -48,6 +48,7 @@ include("models/SNCre/main.jl")
 include("models/Cross/main.jl")
 include("functions/MLE.jl")
 include("functions/main.jl")
+include("functions/extension.jl")
 
 
 end  # end of module --SFrontiers

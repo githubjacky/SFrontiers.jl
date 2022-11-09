@@ -92,7 +92,7 @@ function cleanMarginalEffect(m::Matrix, labels::Vector{Any})
         if length(unique(m[:, i])) == 1
             append!(drop, i)
             count[label] == 1 ? (filter!(x->x!=label, unique_label)) : (count[label] -= 1)
-            i == id[label] && (id[label] = pos[label][1+(length(pos[label])-count[labl])])
+            i == id[label] && (id[label] = pos[label][1+(length(pos[label])-count[label])])
             continue
         end
 

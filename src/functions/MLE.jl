@@ -22,8 +22,10 @@ function MLE(struc::SFmodel, data, opt, startpt)
             )
         )
         startpt = minimizer(warm_opt)
-        println(" Number of total iterations: $(iterations(warm_opt))\n")
-        pretty_table(hcat(struc.varmat, startpt); header=["", "Var.", "Coef."])
+        if opt[:verbose]
+            println(" Number of total iterations: $(iterations(warm_opt))\n")
+            pretty_table(hcat(struc.varmat, startpt); header=["", "Var.", "Coef."])
+        end
     end
 
     printstyled("\n * optimization - main process\n\n", color=:yellow)
@@ -64,7 +66,7 @@ function post_estimation(_Hessinan, _coevec, data, struc)
         throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
     end
     diagonal = diag(var_cov_matrix)
-    if !all( diagonal .> 0 )
+    if !all(diagonal .> 0)
         _ = isMultiCollinearity.([:frontiers, fieldnames(typeof(data.dist))..., :σᵥ²],
                                 [data.frontiers, unpack(data.dist)..., data.σᵥ²])
          fieldcount(typeof(struc.data)) != 0 && (_ = isMultiCollinearity.(fieldnames(typeof(struc.data)), unpack(struc.data)))
@@ -105,4 +107,44 @@ function outputTable(varmat, _coevec, diagonal, nofobs)
         hcat(varmat, _coevec, stddev, t_stats, p_value, ci_low, ci_upp);
         header=["", "Var.", "Coef.", "Std. Err.", "z", "P>|z|", "95%CI_l", "95%CI_u"]
     )
+end
+
+
+function bootstrapMLE(struc::SFmodel, data, opt, startpt)
+    _Hessian = TwiceDifferentiable(
+        ξ -> LLT(ξ, struc, data),
+        ones(length(startpt));
+        autodiff=:forward
+    )
+
+    main_opt = optimize(
+        _Hessian,
+        startpt,
+        opt[:main_solver],
+        Options(
+            g_tol=opt[:tolerance],
+            iterations=opt[:main_maxIT],
+            store_trace=false,
+            show_trace=false
+        )
+    )
+    _coevec = minimizer(main_opt)
+
+    if (Optim.iteration_limit_reached(main_opt)) || 
+        (isnan(Optim.g_residual(main_opt)) ) ||  
+        (Optim.g_residual(main_opt) > 1e-1)
+            resample = true
+            return _coevec, resample
+    end 
+
+    numerical_hessian = hessian!(_Hessinan, _coevec)
+    var_cov_matrix = try
+        inv(numerical_hessian)
+    catch
+        resample = true
+        return _coevec, resample
+    end
+    !all(diag(var_cov_matrix) .> 0) && (resample = true)
+    
+    return _coevec, sample
 end

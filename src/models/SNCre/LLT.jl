@@ -1,3 +1,21 @@
+function LLT(ξ, struc::SNCre, data::PanelData)
+    η, σᵥ², dist_param = compositeError(ξ, struc, data)
+
+    lnf_vec = Vector{Any}(undef, length(η))
+    lag = length(σᵥ²[1]) - size(η[1], 1)
+    dist_type = typeof(data.dist)
+    for i = eachindex(η)
+        tar = η[i]
+        dist_paramᵢ, σᵥ²ᵢ = [k[i][begin+lag:end] for k in dist_param], σᵥ²[i][begin+lag:end]
+        simulatd_likelihood = [Base.prod(Like(dist_type, σᵥ²ᵢ, dist_paramᵢ..., tar[:, j])) for j = axes(tar, 2)]
+        lnfᵢ = log(mean(simulatd_likelihood))
+        lnf_vec[i] = isinf(lnfᵢ) ? -1.0e+10 : lnfᵢ
+    end
+
+    return -sum(lnf_vec)
+end
+
+
 function compositeError(ξ,  struc::SNCre, data::PanelData)
     type, dist, σᵥ², depvar, frontiers = unpack(data)
     SCE, R, σₑ², xmean, ψ = unpack(struc, (:SCE, :R, :σₑ², :xmean, :ψ))
@@ -20,7 +38,11 @@ function Η(SCE::AR, ϵ, η_param)
     ρ = η_param[1]
     l == 1 || (ρ = coeffs(fromroots(ρ./(abs.(ρ).+1)))[1:end-1])
     beg = 1+l
-    return [i[beg:end, :] - sum([i[beg-j:end-j, :] * ρ[j] for j = eachindex(ρ)]) for i in ϵ]
+    return [
+        i[beg:end, :] -
+        sum([i[beg-j:end-j, :] * ρ[j]
+        for j = eachindex(ρ)]) for i in ϵ
+    ]
 end
 
 
@@ -66,22 +88,4 @@ function Η(SCE::ARMA, ϵ, η_param)
     end
 
     return η
-end
-
-
-function LLT(ξ, struc::SNCre, data::PanelData)
-    η, σᵥ², dist_param = compositeError(ξ, struc, data)
-
-    lnf_vec = Vector{Any}(undef, length(η))
-    lag = length(σᵥ²[1]) - size(η[1], 1)
-    dist_type = typeof(data.dist)
-    for i = eachindex(η)
-        tar = η[i]
-        dist_paramᵢ, σᵥ²ᵢ = [k[i][begin+lag:end] for k in dist_param], σᵥ²[i][begin+lag:end]
-        simulatd_likelihood = [Base.prod(Like(dist_type, σᵥ²ᵢ, dist_paramᵢ..., tar[:, j])) for j = axes(tar, 2)]
-        lnfᵢ = log(mean(simulatd_likelihood))
-        lnf_vec[i] = isinf(lnfᵢ) ? -1.0e+10 : lnfᵢ
-    end
-
-    return -sum(lnf_vec)
 end

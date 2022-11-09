@@ -3,4 +3,4 @@ function jlmsbc(ξ, struc::Cross, data::Data)
    return base_jlmsbc(typeof(data.dist), σᵥ², dist_param..., ϵ)
 end
 
-marginalEffect(ξ, struc::Cross, dist) = baseMarginal(ξ, struc, dist)
+marginalEffect(ξ, struc::Cross, dist, bootstrap=false) = baseMarginal(ξ, struc, dist, bootstrap)
