@@ -11,4 +11,4 @@ function jlmsbc(ξ, struc::SNCre, data::PanelData)
    return base_jlmsbc(typeof(data.dist), flatTidyLag(σᵥ², dist_param...; l=l)..., _ϵ)
 end
 
-marginalEffect(ξ, struc::SNCre{T}, data, bootstrp) where{T<:AbstractSerialCorr} = baseMarginal(ξ, struc, data, bootstrap)
+marginalEffect(ξ, struc::SNCre{T}, data; bootstrap=false) where{T<:AbstractSerialCorr} = baseMarginal(ξ, struc, data, bootstrap)

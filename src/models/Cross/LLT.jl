@@ -6,7 +6,6 @@ end
 
 
 function compositeError(ξ, struc::Cross, data::Data)
-    type, dist, σᵥ², depvar, frontiers = unpack(data)
     β, dist_coeff, Wᵥ = slice(ξ, struc.ψ, mle=true)
-    return (type() * (depvar - frontiers*β))[:, 1], exp.(σᵥ² * Wᵥ), dist(dist_coeff)
+    return (data.type() * (data.depvar - data.frontiers*β))[:, 1], exp.(data.σᵥ² * Wᵥ), data.dist(dist_coeff)
 end

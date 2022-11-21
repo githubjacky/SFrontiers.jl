@@ -5,10 +5,8 @@ module SFrontiers
 export Cross, SNCre
 
 #=  export functionality  of model construction =#
-export useData, sfspec, sfopt, sfinit, sfmodel_fit, sfmarginal
+export useData, sfspec, sfopt, sfinit, sfmodel_fit, sfmarginal, sfCI
 
-#=  export functionality  of some tools =#
-export sfpredict, jlmsbc, marginal
 
 #=  export general distribution assumption and economic type  =#
 export Half, half, h, Trun, trun, t, Expo, expo, e
@@ -24,7 +22,8 @@ export NelderMead, SimulatedAnnealing, SAMIN, ParticleSwarm,
 
 
 #=  used packages reference  =#
-using DataFrames, Distributions, Random, Statistics, Optim, LinearAlgebra, PrettyTables, StatsFuns, ForwardDiff
+using DataFrames, Distributions, Random, Statistics, Optim, LinearAlgebra, PrettyTables, StatsFuns
+using ForwardDiff
 import Optim: TwiceDifferentiable, optimize, Options, minimizer, iterations, iteration_limit_reached,
               minimum, time_run
 import DataStructures: OrderedDict

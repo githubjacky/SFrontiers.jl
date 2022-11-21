@@ -88,22 +88,25 @@ function cleanMarginalEffect(m::Matrix, labels::Vector{Any})
     count = Dict([(i, length(pos[i])) for i in unique_label])
     drop = []
     for (i, label) in enumerate(labels)
-        # drop the constant columns
+        # task1: drop the constant columns
         if length(unique(m[:, i])) == 1
             append!(drop, i)
-            count[label] == 1 ? (filter!(x->x!=label, unique_label)) : (count[label] -= 1)
-            i == id[label] && (id[label] = pos[label][1+(length(pos[label])-count[label])])
+            print(count[label])
+            count[label] -= 1
+            if i == id[label] && count != 0
+                id[label] = pos[label][1+(length(pos[label])-count[label])]
+            end
             continue
         end
-
-        # drop the columns with duplicated column names
+        # task2: drop the columns with duplicated column names
         if i != id[label]
             tar = id[label]
             m[:, tar] = m[:, tar] + m[:, i]
             append!(drop, i)
+            count[label] -= 1
         end
     end
-    length(unique_label) == 0 && error("there is no marginal effect")
+    length(labels) == length(drop) && error("there is no marginal effect")
 
     return m[:, Not(drop)], unique_label
 end
