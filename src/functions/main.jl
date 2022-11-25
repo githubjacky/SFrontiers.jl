@@ -4,7 +4,7 @@ useData() = nothing
 
 
 function sfopt(;kwargs...)
-    default_opt = OrderedDict(
+    default_opt = OrderedDict{Symbol, Any}(
         :warmstart_solver=>NelderMead(), 
         :warmstart_maxIT=>100,
         :main_solver=>Newton(),
@@ -23,7 +23,7 @@ end
 1. given the all initial values of  parameters
 2. given only some of the initial values and it's necessary to assign the keyword
 """
-sfinit(startpt::Vector) = startpt
+sfinit(startpt::Vector{<:Real})  = startpt
 sfinit(;kwargs...) = values(kwargs)
 
 function sfstartpt(frontiers, depvar, ψ; panel)

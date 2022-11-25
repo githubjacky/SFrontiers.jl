@@ -1,14 +1,16 @@
-#=  dependencies  =#
+# dependencies
 using CSV, DataFrames, BenchmarkTools, Plots, Revise
 include("../src/SFrontiers.jl")
 using .SFrontiers
 
-#=  read the data and create constant column  =#
+
+#  read the data and create constant column
 df = DataFrame(CSV.File("test/data/SNCreData.csv"))
 df.log_y = log.(df.y)
 df.log_x1 = log.(df.x1)
 df.log_x2 = log.(df.x2)
 df._cons = ones(nrow(df))
+
 
 #=  estimate the flexible panel model with serial correlated error  =#
 res = sfmodel_fit(
@@ -32,12 +34,9 @@ res = sfmodel_fit(
         0.
     ]) 
 )
-#= plot the efficiency and inefficiency index  =#
-# h1 = histogram(res.jlms, xlabel="JLMS", bins=100, label=false)
-# h2 = histogram(res.bc, xlabel="BC", bins=50, label=false)
-# h1h2 = plot(h1, h2, layout = (1,2), legend=false)
 
-#= matlab evaluation of the estimated parameters  =#
+
+# the results of matlab evaluation
 # AR1ans = [0.5984016335288649,      # β₁
 #           0.0255450270909429,      # β₂
 #           -0.015445655766062863,   # slope
@@ -51,6 +50,14 @@ res = sfmodel_fit(
 
 # @show sum(abs.(AR1ans .- res.ξ))
 
+
+# efficiency and inefficiency index
+h1 = histogram(res.jlms, xlabel="JLMS", bins=100, label=false)
+h2 = histogram(res.bc, xlabel="BC", bins=50, label=false)
+h1h2 = plot(h1, h2, layout = (1,2), legend=false)
+
+
+# marginal effect
 marginal, marginal_mean = sfmarginal(res)
 plot(
     df[:, :_cons],
@@ -61,6 +68,3 @@ plot(
     label=false
 )
 hline!([0.00], label = false)
-
-# bootstrap marginal effect
-# err_ci, bsdata = sfmarginal(res, bootstrap=true, R=100, seed=1232, iter=500, getBootData=true);

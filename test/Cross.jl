@@ -49,4 +49,11 @@ hline!([0.00], label = false)
 
 
 # bootstrap marginal effect
-err_ci, bsdata = sfmarginal(res, bootstrap=true, R=100, seed=1232, iter=100, getBootData=true);
+err_ci, bsdata = sfmarginal(
+    res,
+    bootstrap=true,
+    R=100,
+    seed=1232,
+    iter=100,
+    getBootData=true
+)

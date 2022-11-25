@@ -9,6 +9,7 @@ function sfmarginal(result::NamedTuple; bootstrap=false, kwargs...)
     end
 end
 
+
 function bootStrapMarginal(
     result::NamedTuple;
     mymisc=nothing,
@@ -47,7 +48,7 @@ function bootStrapMarginal(
             bootstrap_data, bootstrap_struc = resampling(result.data, result.struc; rng=rng)
         end
         
-        Hessian, ξ, warmup_opt, main_opt = MLE(bootstrap_struc, bootstrap_data, result.options, result.ξ)
+        Hessian, ξ, _, main_opt = MLE(bootstrap_struc, bootstrap_data, result.options, result.ξ)
         if Optim.iteration_limit_reached(main_opt) || 
            isnan(Optim.g_residual(main_opt)) ||  
            Optim.g_residual(main_opt) > 1e-1
@@ -133,7 +134,7 @@ function sfCI(
     )
     # bias-corrected (but not accelerated) confidence interval 
     # For the "accelerated" factor, need to estimate the SF model 
-    #    for every jack-knifed sample, which is expensive.
+    # for every jack-knifed sample, which is expensive.
 
     isa(observed ,NamedTuple) && (observed = values(observed))
     ((level > 0.0) && (level < 1.0)) || throw("The significance level (`level`) should be between 0 and 1.")
